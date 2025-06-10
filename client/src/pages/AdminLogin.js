@@ -7,6 +7,7 @@ const AdminLogin = () => {
   const [userId, setUserId] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [backgroundVideo, setBackgroundVideo] = useState('');
   
   const { login, user, checkUserRole } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -22,6 +23,12 @@ const AdminLogin = () => {
       }
     }
   }, [user, navigate]);
+  
+  // Load the background video
+  useEffect(() => {
+    const selectedVideo = localStorage.getItem('backgroundVideo') || 'bg3';
+    setBackgroundVideo(`${selectedVideo}.mp4?t=${Date.now()}`);
+  }, []);
   
   // Apply no-scroll class when component mounts
   useEffect(() => {
@@ -85,10 +92,39 @@ const AdminLogin = () => {
   return (
     <div className="full-page-container">
       {/* Video Background */}
-      <video autoPlay loop muted poster="/video/poster.jpg" className="bg-video">
-        <source src="/video/bg.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+      {backgroundVideo && (
+        <div className="video-background-container">
+          <video
+            key={backgroundVideo}
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
+              position: 'fixed',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              zIndex: -1,
+              top: 0,
+              left: 0
+            }}
+          >
+            <source src={`/video/${backgroundVideo}`} type="video/mp4" />
+          </video>
+          <div className="admin-bg-overlay"></div>
+        </div>
+      )}
+      
+      {/* Fallback to gradient background if video fails */}
+      <div className="gradient-background" style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: -2
+      }}></div>
       
       <div className="modern-login-container">
         <Card className="glass-container">

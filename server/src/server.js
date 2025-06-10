@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const compression = require('compression');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -20,11 +21,14 @@ connectDB();
 
 const app = express();
 
+// Add compression to reduce response size
+app.use(compression());
+
 // Middleware
 app.use(cors());
-// Increase JSON payload limit to 50MB
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Reduce JSON payload limit from 50MB to 5MB
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ limit: '5mb', extended: true }));
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -33,8 +37,20 @@ app.use('/api/admin', adminRoutes);
 
 // Serve static files from the React app when in production
 if (process.env.NODE_ENV === 'production') {
-  // Set static folder
-  app.use(express.static(path.join(__dirname, '../../client/build')));
+  // Set cache control headers for static assets
+  const staticOptions = {
+    maxAge: '1d', // Cache static assets for 1 day
+    setHeaders: (res, path) => {
+      // Set longer cache for media files
+      if (path.endsWith('.mp4') || path.endsWith('.jpg') || path.endsWith('.png') || 
+          path.endsWith('.webp') || path.endsWith('.svg')) {
+        res.setHeader('Cache-Control', 'public, max-age=604800'); // 7 days
+      }
+    }
+  };
+  
+  // Set static folder with caching options
+  app.use(express.static(path.join(__dirname, '../../client/build'), staticOptions));
 
   // Any routes not caught by API will be handled by React
   app.get('*', (req, res) => {

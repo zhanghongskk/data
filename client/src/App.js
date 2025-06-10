@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Login from './pages/Login';
@@ -8,6 +8,7 @@ import UserDashboard from './pages/UserDashboard';
 import NotFound from './pages/NotFound';
 import Header from './components/Header';
 import PrivateRoute from './components/PrivateRoute';
+import VideoManagement from './pages/VideoManagement';
 
 // AdminLayout component to include Header for admin routes
 const AdminLayout = ({ children }) => {
@@ -31,6 +32,13 @@ const SimpleLayout = ({ children }) => {
 };
 
 function App() {
+  // Set default background video if not already set
+  useEffect(() => {
+    if (!localStorage.getItem('backgroundVideo')) {
+      localStorage.setItem('backgroundVideo', 'bg3');
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <Router>
@@ -87,6 +95,17 @@ function App() {
               <AdminLayout>
                 <PrivateRoute adminOnly={true}>
                   <AdminDashboard section="userlist" />
+                </PrivateRoute>
+              </AdminLayout>
+            } 
+          />
+          {/* Video Management Route */}
+          <Route 
+            path="/admin/video" 
+            element={
+              <AdminLayout>
+                <PrivateRoute adminOnly={true}>
+                  <VideoManagement />
                 </PrivateRoute>
               </AdminLayout>
             } 

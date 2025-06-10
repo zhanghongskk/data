@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 // Connect to MongoDB
 const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/phone-number-generator';
+    const mongoURI = process.env.MONGODB_URI || 'mongodb://mongo:mobVMFlsMKPiZgopplnOdZoZkXxEjYRV@yamabiko.proxy.rlwy.net:40800';
     
     const conn = await mongoose.connect(mongoURI, {
       useNewUrlParser: true,

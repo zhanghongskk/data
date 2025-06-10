@@ -38,6 +38,10 @@ const AdminDashboard = ({ section = 'dashboard' }) => {
   const [showModal, setShowModal] = useState(false);
   const [modalUser, setModalUser] = useState(null);
   
+  // Add this line to fix the undefined variable
+  const [showVideoBackground] = useState(true);
+  const [backgroundVideo, setBackgroundVideo] = useState('bg3.mp4');
+  
   // State for confirmation modal
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
@@ -57,6 +61,25 @@ const AdminDashboard = ({ section = 'dashboard' }) => {
   const [selectedUserIds, setSelectedUserIds] = useState([]);
   const [selectAllUsers, setSelectAllUsers] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  
+  // Add effect to load the selected background video
+  useEffect(() => {
+    const loadBackgroundVideo = () => {
+      const selectedVideo = localStorage.getItem('backgroundVideo') || 'bg3';
+      setBackgroundVideo(`${selectedVideo}.mp4?t=${Date.now()}`);
+    };
+    
+    // Load initially
+    loadBackgroundVideo();
+    
+    // Listen for storage changes (in case video is changed in another tab)
+    window.addEventListener('storage', loadBackgroundVideo);
+    
+    // Clean up event listener
+    return () => {
+      window.removeEventListener('storage', loadBackgroundVideo);
+    };
+  }, []);
   
   // Fetch users and phone numbers count
   useEffect(() => {
@@ -709,22 +732,33 @@ const AdminDashboard = ({ section = 'dashboard' }) => {
   return (
     <>
       {/* Video Background - Optimized for performance */}
-      <video 
-        autoPlay 
-        loop 
-        muted 
-        className="bg-video" 
-        playsInline
-        style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: '-1' }}
-        onError={(e) => {
-          // If video file fails to load, apply a fallback background
-          e.target.style.display = 'none';
-          document.body.style.background = 'linear-gradient(135deg, #1f2937, #111827)';
-        }}
-      >
-        <source src="/video/bg.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+      {showVideoBackground ? (
+        <div className="video-background-container">
+          <video
+            key={backgroundVideo}
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
+              position: 'fixed',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              zIndex: -1,
+              top: 0,
+              left: 0
+            }}
+          >
+            <source src={`/video/${backgroundVideo}`} type="video/mp4" />
+          </video>
+          <div className="admin-bg-overlay"></div>
+        </div>
+      ) : (
+        <div className="video-background-container gradient-background">
+          {/* Fallback to gradient background */}
+        </div>
+      )}
       
       {/* Animated Tab Navigation - Removed as it's redundant with the header menu */}
       

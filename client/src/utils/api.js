@@ -154,4 +154,50 @@ export const bulkAssignToAllUsers = async (countPerUser) => {
   const authAxios = createAuthAxios();
   const response = await authAxios.post('/api/admin/bulk-assign-to-all', { countPerUser });
   return response.data;
+};
+
+// Set background video
+export const setBackgroundVideo = async (videoId) => {
+  try {
+    const authAxios = createAuthAxios();
+    const response = await authAxios.post('/api/admin/set-background-video', { videoId });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Error setting background video');
+  }
+};
+
+// Upload a video file
+export const uploadVideo = async (videoFile) => {
+  try {
+    const authAxios = createAuthAxios();
+    
+    // Create form data for file upload
+    const formData = new FormData();
+    formData.append('video', videoFile);
+    
+    // Custom headers for multipart form data
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: authAxios.defaults.headers.Authorization
+      }
+    };
+    
+    const response = await axios.post('/api/admin/upload-video', formData, config);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Error uploading video');
+  }
+};
+
+// Get list of available videos
+export const getAvailableVideos = async () => {
+  try {
+    const authAxios = createAuthAxios();
+    const response = await authAxios.get('/api/admin/videos');
+    return response.data.videos;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Error fetching videos');
+  }
 }; 
